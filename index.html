@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>myMemoPad</title>
   <script src="js/jquery-2.1.3.min.js"></script>
   <link rel="stylesheet" href="css/output.css">
@@ -10,146 +11,44 @@
 
 <body class="max-w-[1200px] mx-auto">
   <!-- ヘッダー -->
-  <header class="bg-header h-64 w-screen">
-
+  <header>
+    <div class="w-full">
+      <img src="./img/header.jpg" alt="" class="w-full">
+    </div>
   </header>
   <!-- メイン -->
   <main>
-    <!-- 入力エリア -->
-    <div class="flex flex-col m-5 p-5 border-solid border-2 border-slate-500 rounded-xl">
-      <input id="title" type="text" placeholder="タイトルを入力"
-        class="text-lg py-5 px-2 mb-5  border-solid border-2 border-slate-500 rounded-xl hover:bg-pink-50">
-      <textarea id="text" placeholder="本文を入力"
-        class="text-lg h-24 p-2 border-solid border-2 border-slate-500 rounded-xl hover:bg-pink-50"></textarea>
-    </div>
-    <!-- ボタン部分 -->
-    <div class="mx-auto flex justify-center space-x-20 mb-5">
-      <button id="save"
-        class="text-lg text-center h-14 w-1/3 border-solid border-2 border-slate-500 rounded-xl hover:bg-green-400">登録</button>
-      <button id="clear"
-        class="text-lg text-center h-14 w-1/3 border-solid border-2 border-slate-500 rounded-xl hover:bg-red-400">全削除</button>
-    </div>
+    <div class="flex items-cente justify-center pt-5">
+      <a href="todo.html" class="text-4xl  bg-pink-900 hover:bg-pink-50 rounded-xl">ToDoページはこちら</a>
+  </div>
+  
+      <!-- 入力エリア -->
+      <div class="flex flex-col m-5 p-5 border-solid border-2 border-slate-500 rounded-xl flex-grow">
+        <input id="title" type="text" placeholder="タイトルを入力"
+          class="text-lg py-5 px-2 mb-5 border-solid border-2 border-slate-500 rounded-xl hover:bg-pink-50">
+        <textarea id="text" placeholder="本文を入力"
+          class="text-lg h-24 p-2 border-solid border-2 border-slate-500 rounded-xl hover:bg-pink-50"></textarea>
+      </div>
+      <!-- ボタン部分 -->
+      <div class="mx-auto flex justify-center space-x-20 mb-5">
+        <button id="save"
+          class="text-lg text-center h-14 w-1/3 border-solid border-2 border-slate-500 rounded-xl hover:bg-green-400">登録</button>
+        <button id="clear"
+          class="text-lg text-center h-14 w-1/3 border-solid border-2 border-slate-500 rounded-xl hover:bg-red-400">全削除</button>
+      </div>
+      <!-- 登録内容表示エリア -->
+      <ul id="list" class="mt-5 mb-10 mx-auto border-t-2">
+        <!-- ここに追加データが挿入される -->
+      </ul>
   </main>
-  <!-- 登録内容表示エリア -->
-  <ul id="list" class="mt-5 mb-10 mx-auto border-t-2">
-    <!-- ここに追加データが挿入される -->
-  </ul>
   <!-- フッター -->
-  <footer class="bg-footer h-32">
-
+  <footer class=" h-32">
+    <img src="./img/footer.jpg" alt="">
   </footer>
 
   <!-- 以下js -->
-  <script>
-    // メモを表示する関数 引数key memoDataを渡すのでテンプレートリテラル内で使える
-    //key メモを識別するための鍵
-    //memoData メモの内容を格納したオブジェクト
-    function displayMemo(key, memoData) {
-      const html = `
-    <li data-key="${key}">
-      <p class="memo-title">タイトル：${memoData.title}</p>
-      <p class="memo-text">本文：${memoData.text}</p>
-      <p class="memo-created">登録時間：${memoData.createdAt}</p>
-      <p class="memo-updated">最終編集時間：${memoData.updatedAt}</p>
-      <button class="edit">編集</button>
-      <button class="delete" data-key="${key}">削除</button>
-    </li>
-  `;
-      const $element = $(html);
-      //html変数に格納された文字列をjQueryオブジェクトに変換
+  <script src="./js/memo.js"></script>
 
-      // 以下テンプレートリテラル内のTailwind CSS
-      // 直接記載すると視認性が悪いためJavaScriptで動的に追加
-      $element.addClass('m-5 p-2 border-solid border-2 border-slate-500 rounded-xl hover:bg-pink-50');
-      $element.find('.memo-title').addClass('m-2');
-      $element.find('.memo-text').addClass('m-2');
-      $element.find('.memo-created').addClass('m-2');
-      $element.find('.memo-updated').addClass('m-2');
-      $element.find('.edit').addClass('text-lg text-center h-8 w-16 m-2 border-solid border-2 border-slate-500 rounded-xl hover:bg-green-400');
-      $element.find('.delete').addClass('text-lg text-center h-8 w-16 m-2 border-solid border-2 border-slate-500 rounded-xl hover:bg-red-400');
-      // ここまでcssのこと
-      // リストに追加
-      $("#list").prepend($element);
-    }
-
-    // 1. Save クリックイベント
-    $("#save").on("click", function () {
-      // #titleの値を取得して変数に格納
-      const title = $("#title").val();
-      // #textの値を取得して変数に格納
-      const text = $("#text").val();
-      // 現在時刻を取得し文字列に変換して変数に格納
-      // getTimeしてきた謎の数値は現在時刻をミリ秒で表現した数値→今回のユニークキー
-      const key = new Date().getTime().toString();
-      // 現在の日時をローカライズされた文字列形式で取得して変数に格納
-      const now = new Date().toLocaleString();
-      // 上記で取得したものを含むオブジェクトを作成
-      const memoData = {
-        title: title,
-        text: text,
-        createdAt: now,
-        updatedAt: now
-      };
-      // memoDataオブジェクトをJSON文字列に変換し、ローカルストレージにキーとともに保存
-      localStorage.setItem(key, JSON.stringify(memoData));
-      // メモを表示する関数を呼び出す
-      displayMemo(key, memoData);
-      // ボタンが押された後に、中身を削除する
-      $("#title").val("");
-      $("#text").val("");
-    });
-
-    // 2. Clear クリックイベント
-    $("#clear").on("click", function () {
-      localStorage.clear();
-      $("#list").empty();
-    });
-
-    // 3. ページ読み込み時：保存データ取得表示
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      // 指定されたキーに対応する値を取得し、文字列化されたJSONをオブジェクトに変換
-      const memoData = JSON.parse(localStorage.getItem(key));
-      displayMemo(key, memoData);
-    }
-
-    // 4. Edit クリックイベント
-    $(document).on("click", ".edit", function () {
-      // クリックされたeditボタンに1番近い親要素のliを取得
-      const li = $(this).closest("li");
-      // li要素のdata-key属性からキーを取得→メモデータを特定
-      const key = li.data("key");
-      // キーを使ってローカルストレージからメモデータ取得→JSONからオブジェクトに変換
-      const memoData = JSON.parse(localStorage.getItem(key));
-      // promptメソッドで新しい本文入力を求める 初期値で既存の本文が表示
-      const newText = prompt("新しい本文を入力してください", memoData.text);
-      // newTextがnullでない（キャンセルを押さず入力完了した）場合は以下の処理実行
-      if (newText !== null) {
-        // 入力された新しい本文をメモデータに設定
-        memoData.text = newText;
-        // メモの更新日時を現在のローカライズされた日時に更新
-        memoData.updatedAt = new Date().toLocaleString();
-        // 更新されたメモデータをJSON形式でローカルストレージに保存
-        localStorage.setItem(key, JSON.stringify(memoData));
-        // findメソッド
-        // li要素の中からクラス名が一致するものを見つける→それぞれ書き換える
-        li.find('.memo-text').text(`本文： ${memoData.text}`);
-        li.find('.memo-updated').text(`最終編集時間： ${memoData.updatedAt}`);
-      }
-    });
-
-    // 5. Delete クリックイベント
-    $(document).on("click", ".delete", function () {
-      // deleteボタンに関連づけられたdata-key属性の値を取得→削除対象のメモのキーのこと
-      const key = $(this).data("key");
-      // クリックされたdeleteボタンに1番近い親要素のliを取得→画面から表示を削除
-      $(this).closest("li").remove();
-      // ローカルストレージから削除対象のメモデータを削除
-      localStorage.removeItem(key);
-    });
-
-
-  </script>
 </body>
 
 </html>
