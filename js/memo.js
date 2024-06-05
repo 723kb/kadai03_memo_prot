@@ -56,11 +56,12 @@ $("#save").on("click", function () {
 });
 
 // Enterキーでの登録を実装
-$('#text').keypress(function (e) {
-  if (e.which == 13) { // Enterキーが押された場合
-    $("#save").click(); // 保存ボタンのクリックをトリガーする
-  }
-});
+// 改行したいときに不便なので一旦なしにする
+// $('#text').keypress(function (e) {
+//   if (e.which == 13) { // Enterキーが押された場合
+//     $("#save").click(); // 保存ボタンのクリックをトリガーする
+//   }
+// });
 
 // 以下UUID生成関数
 // ToDoの方のデータと混ざらないようにランダムキー設定
