@@ -17,6 +17,11 @@ $(document).ready(function () {
     saveTodos();
   });
 
+// 完了ボタンのクリックイベントを定義
+$(document).on('click', '.complete', function () {
+  $(this).siblings('span').toggleClass('line-through'); // 完了ボタンの兄弟要素である<span>要素にline-throughクラスを追加/削除
+});
+
   // リスト追加時の関数
   function addTodo() {
     // #todoInputからテキストを取得し、トリミングして変数に格納
@@ -24,13 +29,13 @@ $(document).ready(function () {
     // todotextがからでない時に以下実行
     if (todoText) {
       // リストアイテムを生成
-      const li = $('<li>');
+      const li = $('<li>').addClass('flex items-center'); // flexboxを使用してボタンとテキストを横並びにする
       //  ToDoの内容を表すテキストを生成し、変数に格納
-      const todoSpan = $('<span>').text(todoText);
-      // 削除ボタンを生成
-      const deleteButton = $('<button>').addClass('delete').text('削除');
+      const todoSpan = $('<span>').text(todoText).addClass('flex-grow'); // テキストが横方向に広がるようにする
+      const deleteButton = $('<button>').addClass('delete border-solid border-2 border-slate-500 rounded-xl hover:bg-red-400 text-lg text-center h-8 w-16 m-2').html('<i class="fa-regular fa-trash-can"></i>');
+      const completeButton = $('<button>').addClass('complete  border-solid border-2 border-slate-500 rounded-xl hover:bg-green-400 text-lg text-center h-8 w-16 m-2').html('<i class="fas fa-check"></i>');
       // リストアイテムにToDoの内容と削除ボタンを追加
-      li.append(todoSpan, deleteButton);
+      li.append(todoSpan, deleteButton, completeButton);
       // リストにToDoを追加
       $('#todoList').append(li);
       // 入力フィールドをクリア
@@ -58,14 +63,12 @@ $(document).ready(function () {
     const todos = JSON.parse(localStorage.getItem('todos')) || [];
     // foreachメソッドでループ処理
     todos.forEach(function (todo) {
-      // リストアイテムを生成
-      const li = $('<li>');
-      // ToDoの内容を表すテキストを生成
-      const todoSpan = $('<span>').text(todo.text);
-      // 削除ボタンを生成
-      const deleteButton = $('<button>').addClass('delete').text('削除');
+      const li = $('<li>').addClass('flex items-center');
+      const todoSpan = $('<span>').text(todo.text).addClass('flex-grow');
+      const deleteButton = $('<button>').addClass('delete border-solid border-2 border-slate-500 rounded-xl hover:bg-red-400 text-lg text-center h-8 w-16 m-2').html('<i class="fa-regular fa-trash-can"></i>');
+      const completeButton = $('<button>').addClass('complete  border-solid border-2 border-slate-500 rounded-xl hover:bg-green-400 text-lg text-center h-8 w-16 m-2').html('<i class="fas fa-check"></i>');
       // リストアイテムにToDoの内容と削除ボタンを追加
-      li.append(todoSpan, deleteButton);
+      li.append(todoSpan, deleteButton, completeButton);
       // リストにToDoを追加
       $('#todoList').append(li);
     });

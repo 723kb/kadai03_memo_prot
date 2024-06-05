@@ -5,11 +5,13 @@ function displayMemo(key, memoData) {
   const html = `
     <li data-key="${key}">
       <p class="memo-title">タイトル：${memoData.title}</p>
-      <p class="memo-text">本文：${memoData.text}</p>
+      <p class="memo-text">本文：${memoData.text.replace(/\n/g, '<br>')}</p>
       <p class="memo-created">登録時間：${memoData.createdAt}</p>
       <p class="memo-updated">最終編集時間：${memoData.updatedAt}</p>
-      <button class="edit">編集</button>
-      <button class="delete" data-key="${key}">削除</button>
+      <div class="flex flex-row justify-end">
+      <button class="edit"><i class="fa-solid fa-pen-to-square"></i></button>
+      <button class="delete" data-key="${key}"><i class="fa-regular fa-trash-can"></i></button>
+      </div>
     </li>
   `;
   const $element = $(html);
@@ -20,11 +22,48 @@ function displayMemo(key, memoData) {
   $element.addClass('m-5 p-2 border-solid border-2 border-slate-500 rounded-xl hover:bg-pink-50');
   $element.find('.memo-title').addClass('m-2');
   $element.find('.memo-text').addClass('m-2');
-  $element.find('.memo-created').addClass('m-2');
-  $element.find('.memo-updated').addClass('m-2');
+  $element.find('.memo-created').addClass('m-2 text-end');
+  $element.find('.memo-updated').addClass('m-2 text-end');
   $element.find('.edit').addClass('text-lg text-center h-8 w-16 m-2 border-solid border-2 border-slate-500 rounded-xl hover:bg-green-400');
   $element.find('.delete').addClass('text-lg text-center h-8 w-16 m-2 border-solid border-2 border-slate-500 rounded-xl hover:bg-red-400');
   // ここまでcssのこと
+
+  // 4. Edit クリックイベント
+$element.find(".edit").on("click", function () {
+  // クリックされたeditボタンに1番近い親要素のliを取得
+  const li = $(this).closest("li");
+  // li要素のdata-key属性からキーを取得→メモデータを特定
+  const key = li.data("key");
+  // キーを使ってローカルストレージからメモデータ取得→JSONからオブジェクトに変換
+  const memoData = JSON.parse(localStorage.getItem(key));
+  // promptメソッドで新しい本文入力を求める 初期値で既存の本文が表示
+  const newText = prompt("新しい本文を入力してください", memoData.text);
+  // newTextがnullでない（キャンセルを押さず入力完了した）場合は以下の処理実行
+  if (newText !== null) {
+    // 入力された新しい本文をメモデータに設定
+    memoData.text = newText;
+    // メモの更新日時を現在のローカライズされた日時に更新
+    memoData.updatedAt = new Date().toLocaleString();
+    // 更新されたメモデータをJSON形式でローカルストレージに保存
+    localStorage.setItem(key, JSON.stringify(memoData));
+    // findメソッド
+    // li要素の中からクラス名が一致するものを見つける→それぞれ書き換える
+    li.find('.memo-text').text(`本文： ${memoData.text}`);
+    li.find('.memo-updated').text(`最終編集時間： ${memoData.updatedAt}`);
+  }
+});
+
+// 5. Delete クリックイベント
+$element.find(".delete").on("click", function () {
+  // deleteボタンに関連づけられたdata-key属性の値を取得→削除対象のメモのキーのこと
+  const key = $(this).data("key");
+  // クリックされたdeleteボタンに1番近い親要素のliを取得→画面から表示を削除
+  $(this).closest("li").remove();
+  // ローカルストレージから削除対象のメモデータを削除
+  localStorage.removeItem(key);
+});
+
+
   // リストの上に追加 新しいものが上になる
   $("#list").prepend($element);
 }
@@ -63,6 +102,13 @@ $("#save").on("click", function () {
 //   }
 // });
 
+// Enterキーでの登録を無効化するための修正
+$('#text').keypress(function (e) {
+  if (e.which == 13 && !e.shiftKey) { // Enterキーが押された場合（Shiftキーが押されていない場合）
+    e.preventDefault(); // デフォルトのEnterキー動作を無効化
+  }
+});
+
 // 以下UUID生成関数
 // ToDoの方のデータと混ざらないようにランダムキー設定
 function generateUUID() {
@@ -94,37 +140,3 @@ for (let i = 0; i < localStorage.length; i++) {
   }
 }
 
-// 4. Edit クリックイベント
-$(document).on("click", ".edit", function () {
-  // クリックされたeditボタンに1番近い親要素のliを取得
-  const li = $(this).closest("li");
-  // li要素のdata-key属性からキーを取得→メモデータを特定
-  const key = li.data("key");
-  // キーを使ってローカルストレージからメモデータ取得→JSONからオブジェクトに変換
-  const memoData = JSON.parse(localStorage.getItem(key));
-  // promptメソッドで新しい本文入力を求める 初期値で既存の本文が表示
-  const newText = prompt("新しい本文を入力してください", memoData.text);
-  // newTextがnullでない（キャンセルを押さず入力完了した）場合は以下の処理実行
-  if (newText !== null) {
-    // 入力された新しい本文をメモデータに設定
-    memoData.text = newText;
-    // メモの更新日時を現在のローカライズされた日時に更新
-    memoData.updatedAt = new Date().toLocaleString();
-    // 更新されたメモデータをJSON形式でローカルストレージに保存
-    localStorage.setItem(key, JSON.stringify(memoData));
-    // findメソッド
-    // li要素の中からクラス名が一致するものを見つける→それぞれ書き換える
-    li.find('.memo-text').text(`本文： ${memoData.text}`);
-    li.find('.memo-updated').text(`最終編集時間： ${memoData.updatedAt}`);
-  }
-});
-
-// 5. Delete クリックイベント
-$(document).on("click", ".delete", function () {
-  // deleteボタンに関連づけられたdata-key属性の値を取得→削除対象のメモのキーのこと
-  const key = $(this).data("key");
-  // クリックされたdeleteボタンに1番近い親要素のliを取得→画面から表示を削除
-  $(this).closest("li").remove();
-  // ローカルストレージから削除対象のメモデータを削除
-  localStorage.removeItem(key);
-});
